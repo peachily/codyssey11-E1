@@ -312,13 +312,78 @@
 </details>
 
 ### 3-7. Docker Compose
-#### 1) 단일 서비스 실행
-#### 2) 환경 변수
-#### 3) 멀티 컨테이너
+#### 1) 개념
+- 컨테이너 실행 설정을 `YAML` 파일로 정의하여 한 번에 실행하고 관리할 수 있도록 하는 도구
+- `docker run` 명령어를 파일로 옮겨 실행 설정을 재사용 가능하게 만든 방식
+- 환경 변수를 통해 실행 설정을 분리할 수 있음
+- 여러 컨테이너로 구성된 하나의 애플리케이션을 관리할 때 특히 유용
+
+#### 2) 파일 작성
+- `docker compose up`를 실행하는 프로젝트 루트에 `docker-compose.yml` 생성 후 필요한 내용 작성
+    - `services` : 실행할 컨테이너 목록 정의 → `web`, `db` 등 컨테이너를 구분하기 위한 이름 하위에 각 컨테이너마다 필요한 내용 작성
+    - `image` : 사용할 Docker 이미지
+    - `ports` : 포트 매핑 설정
+    - `environment` : 컨테이너 내부에서 사용할 환경 변수 설정
+<details>
+<summary>실습 내용</summary>
+
+![yaml 파일 생성 및 내용 작성(8082)](./process/23.png)
+![yaml 파일에 환경변수 개발모드 지정, 실행, 상태 확인(8083)](./process/27.png)
+![yaml 파일에 redis 데이터베이스 추가, 실행, 상태 확인(8084)](./process/29.png)
+</details>
+
+#### 3) 실행
+- `docker compose up -d` : 서비스 실행 (백그라운드)
+- `docker compose ps` : 실행 상태 확인
+- `docker compose logs` : 로그 확인
+- `docker compose down` : 서비스 종료 및 정리
+<details>
+<summary>실습 내용</summary>
+
+![도커 서비스 실행(8082)](./process/24.png)
+![도커 로그 확인(8082)](./process/26.png)
+</details>
 
 ---
 ## 4. Github 연동
-22.png
-31.png
+### 4-1. Git 설정 확인
+- `git config --list` : 현재 git 사용자 정보 및 설정 확인 (이름, 이메일, 기본 브랜치 등)
+- `git remote -v` : 연결된 원격 저장소(repository) 확인
+<details>
+<summary>실습 내용</summary>
+
+![git 설정 확인](./process/22.png)
+</details>
+
+### 4-2. SSH 방식 연결
+- `ssh-keygen -t ed25519 -C "<이메일>"` : SSH 인증을 위한 공개키 / 개인키 생성
+- `cat ~/.ssh/id_ed25519.pub` : 생성된 공개키 확인 후 GitHub에 등록
+- `git remote set-url origin git@github.com:<사용자명>/<레포지토리명>.git` : 기존 HTTPS 방식 대신 SSH 방식으로 연결 변경
+- `ssh -T git@github.com` : GitHub와 SSH 연결 정상 여부 확인
+<details>
+<summary>실습 내용</summary>
+
+![SSH 방식 연결](./process/31.png)
+</details>
+
 ---
 ## 5. 트러블 슈팅
+### 5-1. Dockerfile 경로 오류
+- 문제 상황
+  Dockerfile을 작성한 후 `docker build`를 실행했지만, 기본 nginx 페이지가 그대로 출력되고 변경 내용이 반영되지 않았다.
+
+- 원인
+  Dockerfile이 있는 디렉토리가 아닌 다른 위치에서 `docker build`를 실행하여 Docker가 올바른 Dockerfile과 파일들을 인식하지 못했다.
+
+- 해결 방법
+  Dockerfile이 위치한 디렉토리로 이동한 후 다시 `docker build`를 실행했다.
+
+### 5-2. 컨테이너 실행 시 포트 충돌 및 기존 컨테이너 문제
+- 문제 상황  
+  nginx 컨테이너를 실행하려 했으나, 웹페이지가 정상적으로 표시되지 않거나 실행이 되지 않았다.
+
+- 원인
+  동일한 포트를 사용하는 기존 컨테이너가 이미 실행 중이었다.
+
+- 해결 방법
+  기존 컨테이너를 확인한 후 중지 및 삭제를 진행하였다.
