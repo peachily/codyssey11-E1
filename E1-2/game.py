@@ -153,6 +153,7 @@ class QuizGame:
 
         new_quiz = Quiz(question, choices, answer)
         self.quiz_list.append(new_quiz)
+        self.save_state()
         print("✅ 퀴즈가 추가되었습니다!")
 
     def show_best_score(self):
