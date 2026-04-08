@@ -1,3 +1,4 @@
+import json
 from quiz import Quiz
 
 def get_default_quizzes():
@@ -159,6 +160,15 @@ class QuizGame:
             print("아직 기록된 최고 점수가 없습니다.")
         else:
             print(f"🏆 최고 점수: {self.best_score}점")
+    
+    def save_state(self):
+        data = {
+            "quizzes": [quiz.to_dict() for quiz in self.quiz_list],
+            "best_score": self.best_score
+        }
+
+        with open("state.json", "w", encoding="utf-8") as file:
+            json.dump(data, file, ensure_ascii=False, indent=4)
 
     def run(self):
         while True:
@@ -174,5 +184,6 @@ class QuizGame:
             elif choice == 4:
                 self.show_best_score()
             elif choice == 5:
+                self.save_state()
                 print("게임을 종료합니다.")
                 break
