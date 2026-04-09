@@ -173,31 +173,41 @@ class QuizGame:
             json.dump(data, file, ensure_ascii=False, indent=4)
     
     def load_state(self):
-        if not os.path.exists("state.json"):
+        try: 
+            if not os.path.exists("state.json"):
+                self.quiz_list = get_default_quizzes()
+                self.best_score = 0
+                return
+            
+            with open("state.json", "r", encoding="utf-8") as file:
+                data = json.load(file)
+            
+            self.quiz_list = [Quiz.from_dict(q) for q in data.get("quizzes", [])]
+            self.best_score = data.get("best_score", 0)
+        
+        except (json.JSONDecodeError, OSError, KeyError, TypeError):
+            print("⚠️ 저장 데이터를 불러오지 못해 기본 퀴즈로 시작합니다.")
             self.quiz_list = get_default_quizzes()
             self.best_score = 0
-            return
-        
-        with open("state.json", "r", encoding="utf-8") as file:
-            data = json.load(file)
-        
-        self.quiz_list = [Quiz.from_dict(q) for q in data.get("quizzes", [])]
-        self.best_score = data.get("best_score", 0)
 
     def run(self):
-        while True:
-            self.show_menu()
-            choice = self.get_menu_choice()
+        try: 
+            while True:
+                self.show_menu()
+                choice = self.get_menu_choice()
 
-            if choice == 1:
-                self.start_quiz()
-            elif choice == 2:
-                self.show_quiz_list()
-            elif choice == 3:
-                self.add_quiz()
-            elif choice == 4:
-                self.show_best_score()
-            elif choice == 5:
-                self.save_state()
-                print("게임을 종료합니다.")
-                break
+                if choice == 1:
+                    self.start_quiz()
+                elif choice == 2:
+                    self.show_quiz_list()
+                elif choice == 3:
+                    self.add_quiz()
+                elif choice == 4:
+                    self.show_best_score()
+                elif choice == 5:
+                    self.save_state()
+                    print("게임을 종료합니다.")
+                    break
+        except (KeyboardInterrupt, EOFError):
+            print("\n⚠️ 게임을 안전하게 종료합니다.")
+            self.save_state()
