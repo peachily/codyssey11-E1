@@ -1,4 +1,5 @@
 import json
+import os
 from quiz import Quiz
 
 def get_default_quizzes():
@@ -170,6 +171,18 @@ class QuizGame:
 
         with open("state.json", "w", encoding="utf-8") as file:
             json.dump(data, file, ensure_ascii=False, indent=4)
+    
+    def load_state(self):
+        if not os.path.exists("state.json"):
+            self.quiz_list = get_default_quizzes()
+            self.best_score = 0
+            return
+        
+        with open("state.json", "r", encoding="utf-8") as file:
+            data = json.load(file)
+        
+        self.quiz_list = [Quiz.from_dict(q) for q in data.get("quizzes", [])]
+        self.best_score = data.get("best_score", 0)
 
     def run(self):
         while True:
