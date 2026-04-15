@@ -82,7 +82,25 @@ quiz-game/
     - `push`: 로컬 저장소의 커밋 내용을 원격 저장소(GitHub)에 반영하는 과정
     - `pull`: 원격 저장소의 변경 내용을 로컬로 가져와 최신 상태로 유지하는 과정
 
-### 4-2. Git clone
+### 4-2. 브랜치 및 병합
+- 브랜치를 통해 작업 내용을 분리하여 관리 → 기존 코드에 영향을 주지 않고 새로운 기능을 개발 가능
+- 명령어
+    - `git branch`: 브랜치 목록 확인
+    - `git checkout -b <브랜치명>`: 새로운 브랜치 생성 및 이동
+    - `git checkout <브랜치명>`: 특정 브랜치로 이동
+    - `git merge <브랜치명>`: 다른 브랜치의 작업 내용을 현재 브랜치에 병합
+- 기능 단위로 작업을 분리하고, 안정적으로 코드 변경 사항을 관리하기 위해 사용함
+    - (1) `main` 브랜치에서 새로운 브랜치 생성
+    - (2) 기능 개발 진행 후 `commit`
+    - (3) `main` 브랜치로 돌아와 `merge` 수행
+<details>
+<summary>실습 내용</summary>
+
+![git branch, merge](./process/git_branch_merge.png)
+![git graph](./process/git_graph_all.png)
+</details>
+
+### 4-3. Git clone
 - GitHub는 여러 환경에서 동일한 프로젝트를 공유하고 협업할 수 있도록 원격 저장소를 제공하는 플랫폼
 - `git clone`을 사용하면 기존 프로젝트를 그대로 가져와 동일한 작업 환경을 구성할 수 있음
 <details>
@@ -92,7 +110,7 @@ quiz-game/
 ![git clone, pull](./process/git_clone_pull.png)
 </details>
 
-### 4-3. Git 이력 확인
+### 4-4. Git 이력 확인
 - Git은 모든 변경 사항을 커밋 단위로 기록하며, 이를 통해 작업 이력을 확인할 수 있음
 - 프로젝트의 변경 흐름과 작업 과정을 파악하고 버전 관리의 핵심적인 역할을 수행
 - `git log --oneline --graph`
