@@ -32,6 +32,14 @@ def input_matrix(n):
                 print("입력 형식 오류: 숫자만 입력하세요.")
     return matrix
 
+def normalize(label):
+    if label == "+":
+        return "Cross"
+    elif label.lower() == "x":
+        return "X"
+    else:
+        return label
+
 def run_user_mode():
     print("=== Cross 필터 입력 ===")
     filter_cross = input_matrix(3)
@@ -51,6 +59,48 @@ def run_user_mode():
     else: 
         print("판정: ", result)
 
+def run_json_mode():
+    import json
+    with open("data.json", "r") as f:
+        data = json.load(f)
+    filters = data["filters"]
+    patterns = data["patterns"]
+    total_count = 0
+    pass_count = 0
+    fail_count = 0
+    fail_cases = []
+    for key, value in patterns.items():
+        print("\n===== 현재 테스트:", key, "=====")
+        size = int(key.split("_")[1])
+        filter_cross = filters[f"size_{size}"]["cross"]
+        filter_x = filters[f"size_{size}"]["x"]
+        pattern = value["input"]
+        expected = value["expected"]
+        score_cross = mac(pattern, filter_cross)
+        score_x = mac(pattern, filter_x)
+        result = decide(score_cross, score_x)
+        expected = normalize(expected)
+        print("Cross 점수:", score_cross)
+        print("X 점수:", score_x)
+        print("결과:", result)
+        print("정답:", expected)
+        if result == expected:
+            print("PASS")
+            pass_count += 1
+        else:
+            print("FAIL")
+            fail_count += 1
+            fail_cases.append(key)
+        total_count += 1
+    print("\n===== 결과 요약 =====")
+    print("총 테스트:", total_count)
+    print("통과:", pass_count)
+    print("실패:", fail_count)
+    if fail_cases:
+        print("실패 케이스:")
+        for case in fail_cases:
+            print("-", case)
+
 if __name__ == "__main__":
     print("=== Mini NPU Simulator ===")
     print("1. 사용자 입력 (3x3)")
@@ -59,6 +109,6 @@ if __name__ == "__main__":
     if choice == "1":
         run_user_mode()
     elif choice == "2":
-        print("...")
+        run_json_mode()
     else:
         print("잘못된 입력입니다.")
