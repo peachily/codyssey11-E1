@@ -1,3 +1,6 @@
+import json
+import time
+
 def mac(pattern, filt):
     answer = 0
     n = len(pattern)
@@ -15,6 +18,18 @@ def decide(score_cross, score_x, epsilon=1e-9):
     else:
         answer = "X"
     return answer
+
+def is_valid_matrix(matrix, n):
+    if not isinstance(matrix, list):
+        return False
+    if len(matrix) != n:
+        return False
+    for row in matrix:
+        if not isinstance(row, list):
+            return False
+        if len(row) != n:
+            return False
+    return True
 
 def input_matrix(n):
     matrix = []
@@ -40,6 +55,24 @@ def normalize(label):
     else:
         return label
 
+def measure_mac_time(pattern, filt, repeat=10000):
+    start = time.perf_counter()
+    for _ in range(repeat):
+        mac(pattern, filt)
+    end = time.perf_counter()
+    answer = ((end-start)/repeat)*1000
+    return answer
+
+def run_performance_analysis(filters):
+    print("\n===== 성능 분석 =====")
+    print("크기\t 평균 시간(ms)\t연산 횟수")
+    sizes = [3, 5, 13, 25]
+    for size in sizes:
+        filter_cross = filters[f"size_{size}"]["cross"]
+        avg_time = measure_mac_time(filter_cross, filter_cross)
+        operation_count = size*size
+        print(f"{size}x{size}\t{avg_time: .6f}\t\t{operation_count}")
+
 def run_user_mode():
     print("=== Cross 필터 입력 ===")
     filter_cross = input_matrix(3)
@@ -60,7 +93,6 @@ def run_user_mode():
         print("판정: ", result)
 
 def run_json_mode():
-    import json
     with open("data.json", "r") as f:
         data = json.load(f)
     filters = data["filters"]
@@ -70,16 +102,31 @@ def run_json_mode():
     fail_count = 0
     fail_cases = []
     for key, value in patterns.items():
+        total_count += 1
         print("\n===== 현재 테스트:", key, "=====")
         size = int(key.split("_")[1])
         filter_cross = filters[f"size_{size}"]["cross"]
         filter_x = filters[f"size_{size}"]["x"]
         pattern = value["input"]
-        expected = value["expected"]
+        expected = normalize(value["expected"])
+        if not is_valid_matrix(pattern, size):
+            print("FAIL - 패턴 크기 불일치")
+            fail_count += 1
+            fail_cases.append(f"{key}: 패턴 크기 불일치")
+            continue
+        if not is_valid_matrix(filter_cross, size):
+            print("FAIL - Cross 필터 크기 불일치")
+            fail_count += 1
+            fail_cases.append(f"{key}: Cross 필터 크기 불일치")
+            continue
+        if not is_valid_matrix(filter_x, size):
+            print("FAIL - X 필터 크기 불일치")
+            fail_count += 1
+            fail_cases.append(f"{key}: X 필터 크기 불일치")
+            continue
         score_cross = mac(pattern, filter_cross)
         score_x = mac(pattern, filter_x)
         result = decide(score_cross, score_x)
-        expected = normalize(expected)
         print("Cross 점수:", score_cross)
         print("X 점수:", score_x)
         print("결과:", result)
@@ -91,7 +138,6 @@ def run_json_mode():
             print("FAIL")
             fail_count += 1
             fail_cases.append(key)
-        total_count += 1
     print("\n===== 결과 요약 =====")
     print("총 테스트:", total_count)
     print("통과:", pass_count)
@@ -100,6 +146,7 @@ def run_json_mode():
         print("실패 케이스:")
         for case in fail_cases:
             print("-", case)
+    run_performance_analysis(filters)
 
 if __name__ == "__main__":
     print("=== Mini NPU Simulator ===")
